@@ -1,0 +1,42 @@
+# Algeria History Database
+# FORMAT:
+#   Personality:  NAME = DEFINITION {DOB} {DOD}
+#   Event:        EVENT_NAME : DATE
+#   Important Date: alone on a line: {YYYY-MM-DD}
+#
+# Separators:
+#   '=' separates personality name from definition
+#   ':' separates event name from date
+#   '{}' wraps dates (birth/death embedded in personality line)
+
+Emir Abdelkader = Algerian national hero, born in Guetna near Mascara, son of Muhieddine, led resistance against French colonization, founded a state in western Algeria {1808-09-06} {1883-05-26}
+Larbi Ben M'Hidi = Revolutionary leader and founder member of the FLN, born in Ain M'Lila, martyred by French forces during the Battle of Algiers {1923-09-23} {1957-03-04}
+Mostefa Ben Boulaïd = One of the nine historic founders of the FLN, born in Arris in the Aures mountains, first wilaya commander {1917-02-05} {1956-03-22}
+Krim Belkacem = Founder member of the FLN from Kabylie region, led military operations in Wilaya III, negotiated Evian Accords {1922-12-14} {1970-10-18}
+Houari Boumediene = Second President of Algeria, born in Heliopolis near Guelma, led the 1965 coup against Ben Bella, nationalized hydrocarbons {1932-08-23} {1978-12-27}
+Ferhat Abbas = Algerian nationalist leader, born in Taher near Jijel, first president of the Provisional Government GPRA {1899-10-24} {1985-12-24}
+Ahmed Ben Bella = First President of Algeria after independence, born in Maghnia, leader of the FLN {1916-12-25} {2012-04-11}
+Messali Hadj = Father of Algerian nationalism, born in Tlemcen, founded the first Algerian nationalist party ENA {1898-05-16} {1974-06-03}
+Didouche Mourad = One of the nine historic founders of the FLN, born in Hussein Dey Algiers, fell in battle near Condé Smendou {1927-01-13} {1955-01-18}
+Mohamed Boudiaf = Co-founder of the FLN, born in M'Sila, returned from exile to lead Algeria in 1992, assassinated in Annaba {1919-06-23} {1992-06-29}
+Lalla Fatma N'Soumer = Female resistance leader from Kabylie, born in Werja, fought French colonization under Cherif Boubaghla {1830-01-01} {1863-07-08}
+Abane Ramdane = Architect of the Soummam Congress 1956, born in Azouza Kabylie, played key role organizing the FLN internally {1920-06-10} {1957-12-27}
+Si Mustapha = Military commander of Wilaya IV, born in Blida region, led guerilla operations in Atlas Blideen area {1930-01-01} {1959-09-22}
+Zighoud Youcef = Leader of the Northeast offensive of August 1955, born in Smendou Constantine, led major operations in north Constantine {1921-02-18} {1956-09-25}
+Ali La Pointe = Urban guerrilla fighter in Algiers Casbah, born in Miliana, member of the FLN cell led by Larbi Ben M'Hidi {1930-01-01} {1957-10-08}
+
+Battle of Algiers : 1956-09-30
+Soummam Congress : 1956-08-20
+Declaration of Independence : 1962-07-05
+Sétif Massacre : 1945-05-08
+FLN Founded : 1954-10-31
+Revolution Begins : 1954-11-01
+Evian Accords : 1962-03-18
+Nationalization of Oil : 1971-02-24
+Black October Riots : 1988-10-05
+First Multiparty Elections : 1991-12-26
+
+{1830-06-05}
+{1954-11-01}
+{1962-07-05}
+{1988-10-05}
