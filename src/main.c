@@ -26,24 +26,24 @@ static void loadAll(void) {
            listSize(g_pers), (int)(g_events ? 1 : 0));
 }
 
-static void readLine(const char *prompt, char *buf, int sz) {
+static void readLine(const char *prompt, char *buffer, int size) {
     printf("%s", prompt);
     fflush(stdout);
-    if (!fgets(buf, sz, stdin)) buf[0] = '\0';
-    buf[strcspn(buf, "\n")] = '\0';
-    trimWhitespace(buf);
+    if (!fgets(buffer, size, stdin)) buffer[0] = '\0';
+    buffer[strcspn(buffer, "\n")] = '\0';
+    trimWhitespace(buffer);
 }
 
 static Date readDate(const char *prompt) {
-    char buf[MAX_DATE];
-    readLine(prompt, buf, MAX_DATE);
-    return parseDate(buf);
+    char date_buffer[MAX_DATE];
+    readLine(prompt, date_buffer, MAX_DATE);
+    return parseDate(date_buffer);
 }
 
 /* --- Linked List menu --- */
 static void menuList(void) {
-    int choice;
-    char buf1[MAX_NAME], buf2[MAX_DEF];
+    int menu_choice;
+    char name_buffer[MAX_NAME], def_buffer[MAX_DEF];
     do {
         printf("\n=== Linked List Menu ===\n");
         printf(" 1. Print personality list (name+def)\n");
@@ -63,9 +63,9 @@ static void menuList(void) {
         printf("15. Update personality\n");
         printf("16. Add event\n");
         printf(" 0. Back\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1:
             printf("\n--- Personality List ---\n");
             listPrint(g_pers);
@@ -79,159 +79,159 @@ static void menuList(void) {
             listEventPrint(g_events);
             break;
         case 4: {
-            TList *sorted = sortWord(g_pers);
+            TList *sorted_list = sortWord(g_pers);
             printf("\n--- Alphabetically Sorted ---\n");
-            listPrint(sorted);
-            listFree(sorted);
+            listPrint(sorted_list);
+            listFree(sorted_list);
             break;
         }
         case 5: {
-            TList *sorted = sortWord2(g_pers);
+            TList *sorted_list = sortWord2(g_pers);
             printf("\n--- Sorted by Name Length ---\n");
-            listPrint(sorted);
-            listFree(sorted);
+            listPrint(sorted_list);
+            listFree(sorted_list);
             break;
         }
         case 6: {
-            TList *sorted = sortPersonality(g_pers, g_dates);
+            TList *sorted_list = sortPersonality(g_pers, g_dates);
             printf("\n--- Sorted by Age ---\n");
-            listPrint(sorted);
-            listFree(sorted);
+            listPrint(sorted_list);
+            listFree(sorted_list);
             break;
         }
         case 7: {
-            Date d = readDate("Enter Date of Birth (YYYY-MM-DD): ");
-            getInfoByDates(g_pers, g_dates, d);
+            Date birth_date = readDate("Enter Date of Birth (YYYY-MM-DD): ");
+            getInfoByDates(g_pers, g_dates, birth_date);
             break;
         }
         case 8: {
-            Date d = readDate("Enter Date of Death (YYYY-MM-DD): ");
-            getInfoByDates2(g_pers, g_dates, d);
+            Date death_date = readDate("Enter Date of Death (YYYY-MM-DD): ");
+            getInfoByDates2(g_pers, g_dates, death_date);
             break;
         }
         case 9: {
-            TList *palList = palindromeName(g_pers);
+            TList *palindrome_list = palindromeName(g_pers);
             printf("\n--- Palindrome Names Found ---\n");
-            listPrint(palList);
-            listFree(palList);
+            listPrint(palindrome_list);
+            listFree(palindrome_list);
             break;
         }
         case 10: {
-            readLine("Enter keyword or year: ", buf1, MAX_NAME);
-            TList *sim = similarPersonality(g_pers, buf1);
+            readLine("Enter keyword or year: ", name_buffer, MAX_NAME);
+            TList *similar = similarPersonality(g_pers, name_buffer);
             printf("\n--- Similar Personalities ---\n");
-            listPrint(sim);
-            listFree(sim);
+            listPrint(similar);
+            listFree(similar);
             break;
         }
         case 11: {
-            TBiList *bi = mergeNodes(g_pers, g_dates);
+            TBiList *bidirectional = mergeNodes(g_pers, g_dates);
             printf("\n--- Bidirectional List ---\n");
-            biListPrint(bi);
-            biListFree(bi);
+            biListPrint(bidirectional);
+            biListFree(bidirectional);
             break;
         }
         case 12: {
-            TCircList *circ = merge2Nodes(g_pers, g_dates);
+            TCircList *circular = merge2Nodes(g_pers, g_dates);
             printf("\n--- Circular List (first 20 nodes) ---\n");
-            if (circ) {
-                char dob_buf[MAX_DATE], dod_buf[MAX_DATE];
-                TCircList *cur = circ;
-                int count = 0;
+            if (circular) {
+                char dob_string[MAX_DATE], dod_string[MAX_DATE];
+                TCircList *current = circular;
+                int node_count = 0;
                 do {
                     printf("  [%s]  DoB: %s  DoD: %s\n",
-                           cur->name,
-                           dateToString(cur->dob, dob_buf),
-                           dateToString(cur->dod, dod_buf));
-                    cur = cur->next;
-                    count++;
-                } while (cur != circ && count < 20);
-                circListFree(circ);
+                           current->name,
+                           dateToString(current->dob, dob_string),
+                           dateToString(current->dod, dod_string));
+                    current = current->next;
+                    node_count++;
+                } while (current != circular && node_count < 20);
+                circListFree(circular);
             }
             break;
         }
         case 13: {
-            readLine("Name: ",       buf1, MAX_NAME);
-            readLine("Definition: ", buf2, MAX_DEF);
-            Date dob = readDate("Date of Birth (YYYY-MM-DD): ");
-            Date dod = readDate("Date of Death (YYYY-MM-DD): ");
-            if (addPersonality(DB_FILE, &g_pers, &g_dates, buf1, dob, dod, buf2))
+            readLine("Name: ",       name_buffer, MAX_NAME);
+            readLine("Definition: ", def_buffer, MAX_DEF);
+            Date birth_date = readDate("Date of Birth (YYYY-MM-DD): ");
+            Date death_date = readDate("Date of Death (YYYY-MM-DD): ");
+            if (addPersonality(DB_FILE, &g_pers, &g_dates, name_buffer, birth_date, death_date, def_buffer))
                 printf("Added successfully.\n");
             break;
         }
         case 14: {
-            readLine("Name to delete: ", buf1, MAX_NAME);
-            if (deletepersonality(DB_FILE, &g_pers, &g_dates, buf1))
+            readLine("Name to delete: ", name_buffer, MAX_NAME);
+            if (deletepersonality(DB_FILE, &g_pers, &g_dates, name_buffer))
                 printf("Deleted successfully.\n");
             break;
         }
         case 15: {
-            readLine("Name to update: ",    buf1, MAX_NAME);
-            readLine("New definition: ",    buf2, MAX_DEF);
-            Date dob = readDate("New DoB (YYYY-MM-DD, blank=no change): ");
-            Date dod = readDate("New DoD (YYYY-MM-DD, blank=no change): ");
-            if (updatePersonality(DB_FILE, &g_pers, &g_dates, buf1, buf2, dob, dod))
+            readLine("Name to update: ",    name_buffer, MAX_NAME);
+            readLine("New definition: ",    def_buffer, MAX_DEF);
+            Date new_birth_date = readDate("New DoB (YYYY-MM-DD, blank=no change): ");
+            Date new_death_date = readDate("New DoD (YYYY-MM-DD, blank=no change): ");
+            if (updatePersonality(DB_FILE, &g_pers, &g_dates, name_buffer, def_buffer, new_birth_date, new_death_date))
                 printf("Updated successfully.\n");
             break;
         }
         case 16: {
-            readLine("Event name: ", buf1, MAX_NAME);
-            Date date = readDate("Event date (YYYY-MM-DD): ");
-            if (addEvents(DB_FILE, &g_events, buf1, date))
+            readLine("Event name: ", name_buffer, MAX_NAME);
+            Date event_date = readDate("Event date (YYYY-MM-DD): ");
+            if (addEvents(DB_FILE, &g_events, name_buffer, event_date))
                 printf("Event added.\n");
             break;
         }
         case 0: break;
         default: printf("Invalid choice.\n");
         }
-    } while (choice != 0);
+    } while (menu_choice != 0);
 }
 
 /* --- Queue menu --- */
 static void menuQueue(void) {
-    int choice;
+    int menu_choice;
     do {
         printf("\n=== Queue Menu ===\n");
         printf(" 1. sName   – queue sorted by word count in name\n");
         printf(" 2. ageP    – queue sorted by age\n");
         printf(" 3. toQueue – merged list to queue\n");
         printf(" 0. Back\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1: {
-            TQueue *q = sName(g_pers);
+            TQueue *queue = sName(g_pers);
             printf("\n--- Queue sorted by name word count ---\n");
-            queuePrint(q);
-            queueFree(q);
+            queuePrint(queue);
+            queueFree(queue);
             break;
         }
         case 2: {
-            TQueue *q = ageP(g_dates);
+            TQueue *queue = ageP(g_dates);
             printf("\n--- Queue sorted by age ---\n");
-            queuePrint(q);
-            queueFree(q);
+            queuePrint(queue);
+            queueFree(queue);
             break;
         }
         case 3: {
-            TBiList *bi = mergeNodes(g_pers, g_dates);
-            TQueue  *q  = toQueue(bi);
+            TBiList *bidirectional = mergeNodes(g_pers, g_dates);
+            TQueue  *queue  = toQueue(bidirectional);
             printf("\n--- Queue from merged list ---\n");
-            queuePrint(q);
-            queueFree(q);
-            biListFree(bi);
+            queuePrint(queue);
+            queueFree(queue);
+            biListFree(bidirectional);
             break;
         }
         case 0: break;
         default: printf("Invalid choice.\n");
         }
-    } while (choice != 0);
+    } while (menu_choice != 0);
 }
 
 /* --- Stack menu --- */
 static void menuStack(void) {
-    int choice;
-    char buf1[MAX_NAME], buf2[MAX_DEF];
+    int menu_choice;
+    char name_buffer[MAX_NAME], def_buffer[MAX_DEF];
     do {
         printf("\n=== Stack Menu ===\n");
         printf(" 1. Build stack from merged list & print\n");
@@ -249,129 +249,129 @@ static void menuStack(void) {
         printf("13. Is personality killed?\n");
         printf("14. Reverse stack (recursive)\n");
         printf(" 0. Back\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        TBiList *bi  = mergeNodes(g_pers, g_dates);
-        TStack  *stk = toStack(bi);
-        biListFree(bi);
+        TBiList *bidirectional  = mergeNodes(g_pers, g_dates);
+        TStack  *stack = toStack(bidirectional);
+        biListFree(bidirectional);
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1:
             printf("\n--- Stack ---\n");
-            stackPrint(stk);
+            stackPrint(stack);
             break;
         case 2: {
-            readLine("Name to search: ", buf1, MAX_NAME);
-            TStack *found = getInfoPersonality(stk, buf1);
-            if (found) {
-                char dob_buf[MAX_DATE], dod_buf[MAX_DATE];
+            readLine("Name to search: ", name_buffer, MAX_NAME);
+            TStack *found_person = getInfoPersonality(stack, name_buffer);
+            if (found_person) {
+                char dob_string[MAX_DATE], dod_string[MAX_DATE];
                 printf("Found: [%s]\n  Def: %s\n  DoB: %s  DoD: %s\n",
-                       found->name, found->definition,
-                       dateToString(found->dob, dob_buf),
-                       dateToString(found->dod, dod_buf));
+                       found_person->name, found_person->definition,
+                       dateToString(found_person->dob, dob_string),
+                       dateToString(found_person->dod, dod_string));
             } else printf("Not found.\n");
             break;
         }
         case 3: {
-            TStack *sorted = sortNameStack(stk);
+            TStack *sorted_stack = sortNameStack(stack);
             printf("\n--- Stack sorted alphabetically ---\n");
-            stackPrint(sorted);
-            stackFree(sorted);
-            stk = NULL;
+            stackPrint(sorted_stack);
+            stackFree(sorted_stack);
+            stack = NULL;
             break;
         }
         case 4: {
-            readLine("Name: ",       buf1, MAX_NAME);
-            readLine("Definition: ", buf2, MAX_DEF);
-            Date dob = readDate("DoB (YYYY-MM-DD): ");
-            Date dod = readDate("DoD (YYYY-MM-DD): ");
-            stk = addNameStack(stk, buf1, buf2, dob, dod);
-            printf("Added. Stack now has %d items.\n", stackSize(stk));
+            readLine("Name: ",       name_buffer, MAX_NAME);
+            readLine("Definition: ", def_buffer, MAX_DEF);
+            Date birth_date = readDate("DoB (YYYY-MM-DD): ");
+            Date death_date = readDate("DoD (YYYY-MM-DD): ");
+            stack = addNameStack(stack, name_buffer, def_buffer, birth_date, death_date);
+            printf("Added. Stack now has %d items.\n", stackSize(stack));
             break;
         }
         case 5: {
-            readLine("Name to delete: ", buf1, MAX_NAME);
-            stk = deleteName(stk, buf1);
+            readLine("Name to delete: ", name_buffer, MAX_NAME);
+            stack = deleteName(stack, name_buffer);
             break;
         }
         case 6: {
-            readLine("Name to update: ",  buf1, MAX_NAME);
-            readLine("New definition: ",  buf2, MAX_DEF);
-            Date dob = readDate("New DoB: ");
-            Date dod = readDate("New DoD: ");
-            stk = updateStack(stk, buf1, buf2, dob, dod);
+            readLine("Name to update: ",  name_buffer, MAX_NAME);
+            readLine("New definition: ",  def_buffer, MAX_DEF);
+            Date new_birth_date = readDate("New DoB: ");
+            Date new_death_date = readDate("New DoD: ");
+            stack = updateStack(stack, name_buffer, def_buffer, new_birth_date, new_death_date);
             printf("Updated.\n");
             break;
         }
         case 7: {
-            TQueue *q = stackToQueue(stk);
+            TQueue *queue = stackToQueue(stack);
             printf("\n--- Sorted Queue from Stack ---\n");
-            queuePrint(q);
-            queueFree(q);
+            queuePrint(queue);
+            queueFree(queue);
             break;
         }
         case 8: {
-            TList *list = stackToList(stk);
+            TList *linked_list = stackToList(stack);
             printf("\n--- Sorted List from Stack ---\n");
-            listPrint(list);
-            listFree(list);
+            listPrint(linked_list);
+            listFree(linked_list);
             break;
         }
         case 9: {
-            TStack *ds = definitionStack(stk);
+            TStack *definition_sorted_stack = definitionStack(stack);
             printf("\n--- Stack by definition word count ---\n");
-            stackPrint(ds);
-            stackFree(ds);
-            stk = NULL;
+            stackPrint(definition_sorted_stack);
+            stackFree(definition_sorted_stack);
+            stack = NULL;
             break;
         }
         case 10: {
-            TStack *shortS = NULL, *longS = NULL;
-            pronunciationStack(stk, &shortS, &longS);
+            TStack *short_stack = NULL, *long_stack = NULL;
+            pronunciationStack(stack, &short_stack, &long_stack);
             printf("\n--- Short descriptions ---\n");
-            stackPrint(shortS);
+            stackPrint(short_stack);
             printf("\n--- Long descriptions ---\n");
-            stackPrint(longS);
-            stackFree(shortS); stackFree(longS);
+            stackPrint(long_stack);
+            stackFree(short_stack); stackFree(long_stack);
             break;
         }
         case 11: {
-            char *small = getSmallest(stk);
-            if (small) printf("Smallest definition: %s\n", small);
+            char *smallest_definition = getSmallest(stack);
+            if (smallest_definition) printf("Smallest definition: %s\n", smallest_definition);
             else       printf("Stack is empty.\n");
             break;
         }
         case 12:
-            continuousSearch(stk);
+            continuousSearch(stack);
             break;
         case 13: {
-            readLine("Name: ", buf1, MAX_NAME);
-            bool killed = isPersonalityKilled(stk, buf1);
-            printf("'%s' was %skilled.\n", buf1, killed ? "" : "NOT ");
+            readLine("Name: ", name_buffer, MAX_NAME);
+            bool was_killed = isPersonalityKilled(stack, name_buffer);
+            printf("'%s' was %skilled.\n", name_buffer, was_killed ? "" : "NOT ");
             break;
         }
         case 14: {
-            TStack *rev = recRevStack(stk);
+            TStack *reversed_stack = recRevStack(stack);
             printf("\n--- Reversed Stack ---\n");
-            stackPrint(rev);
-            stackFree(rev);
-            stk = NULL;
+            stackPrint(reversed_stack);
+            stackFree(reversed_stack);
+            stack = NULL;
             break;
         }
         case 0:
-            stackFree(stk);
+            stackFree(stack);
             return;
         default: printf("Invalid choice.\n");
         }
-        stackFree(stk);
-    } while (choice != 0);
+        stackFree(stack);
+    } while (menu_choice != 0);
 }
 
 /* --- BST menu --- */
 static void menuBST(void) {
-    int choice;
-    char buf1[MAX_NAME], buf2[MAX_DEF], buf3[MAX_NAME];
-    TTree *tree = fillTree(DB_FILE);
+    int menu_choice;
+    char name_buffer[MAX_NAME], def_buffer[MAX_DEF], name_buffer2[MAX_NAME];
+    TTree *bst = fillTree(DB_FILE);
 
     do {
         printf("\n=== BST Menu ===\n");
@@ -389,92 +389,92 @@ static void menuBST(void) {
         printf("12. Mirror the tree\n");
         printf("13. Is balanced?\n");
         printf(" 0. Back\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1:
             printf("\n--- In-order ---\n");
-            traversalBSTinOrder(tree);
+            traversalBSTinOrder(bst);
             break;
         case 2:
             printf("\n--- Pre-order ---\n");
-            traversalBSTpreOrder(tree);
+            traversalBSTpreOrder(bst);
             break;
         case 3:
             printf("\n--- Post-order ---\n");
-            traversalBSTpostOrder(tree);
+            traversalBSTpostOrder(bst);
             break;
         case 4:
-            heightSizeBST(tree);
+            heightSizeBST(bst);
             break;
         case 5:
-            readLine("Name: ", buf1, MAX_NAME);
-            getInfoNameTree(tree, buf1);
+            readLine("Name: ", name_buffer, MAX_NAME);
+            getInfoNameTree(bst, name_buffer);
             break;
         case 6: {
-            readLine("Name: ",       buf1, MAX_NAME);
-            readLine("Definition: ", buf2, MAX_DEF);
-            Date dob = readDate("DoB (YYYY-MM-DD): ");
-            Date dod = readDate("DoD (YYYY-MM-DD): ");
-            tree = addNameBST(tree, buf1, buf2, dob, dod);
+            readLine("Name: ",       name_buffer, MAX_NAME);
+            readLine("Definition: ", def_buffer, MAX_DEF);
+            Date birth_date = readDate("DoB (YYYY-MM-DD): ");
+            Date death_date = readDate("DoD (YYYY-MM-DD): ");
+            bst = addNameBST(bst, name_buffer, def_buffer, birth_date, death_date);
             printf("Added.\n");
             break;
         }
         case 7:
-            readLine("Name to delete: ", buf1, MAX_NAME);
-            tree = deleteNameBST(tree, buf1);
+            readLine("Name to delete: ", name_buffer, MAX_NAME);
+            bst = deleteNameBST(bst, name_buffer);
             printf("Deleted.\n");
             break;
         case 8: {
-            readLine("Name to update: ", buf1, MAX_NAME);
-            readLine("New definition: ", buf2, MAX_DEF);
-            Date dob = readDate("New DoB: ");
-            Date dod = readDate("New DoD: ");
-            tree = updateNameBST(tree, buf1, buf2, dob, dod);
+            readLine("Name to update: ", name_buffer, MAX_NAME);
+            readLine("New definition: ", def_buffer, MAX_DEF);
+            Date new_birth_date = readDate("New DoB: ");
+            Date new_death_date = readDate("New DoD: ");
+            bst = updateNameBST(bst, name_buffer, def_buffer, new_birth_date, new_death_date);
             break;
         }
         case 9: {
-            readLine("First name: ",  buf1, MAX_NAME);
-            readLine("Second name: ", buf3, MAX_NAME);
-            TTree *lca = lowestCommonAncestor(tree, buf1, buf3);
-            if (lca) printf("LCA: %s\n", lca->name);
+            readLine("First name: ",  name_buffer, MAX_NAME);
+            readLine("Second name: ", name_buffer2, MAX_NAME);
+            TTree *lowest_common_ancestor = lowestCommonAncestor(bst, name_buffer, name_buffer2);
+            if (lowest_common_ancestor) printf("LCA: %s\n", lowest_common_ancestor->name);
             else     printf("Not found.\n");
             break;
         }
         case 10: {
-            int l, h;
-            printf("Min name length: "); scanf("%d", &l); getchar();
-            printf("Max name length: "); scanf("%d", &h); getchar();
-            printf("Count: %d\n", countNodesRange(tree, l, h));
+            int min_length, max_length;
+            printf("Min name length: "); scanf("%d", &min_length); getchar();
+            printf("Max name length: "); scanf("%d", &max_length); getchar();
+            printf("Count: %d\n", countNodesRange(bst, min_length, max_length));
             break;
         }
         case 11: {
-            readLine("Name: ", buf1, MAX_NAME);
-            TTree *succ = inOrderSuccessor(tree, buf1);
-            if (succ) printf("In-order successor: %s\n", succ->name);
+            readLine("Name: ", name_buffer, MAX_NAME);
+            TTree *successor = inOrderSuccessor(bst, name_buffer);
+            if (successor) printf("In-order successor: %s\n", successor->name);
             else      printf("No successor found.\n");
             break;
         }
         case 12:
-            tree = BSTMirror(tree);
+            bst = BSTMirror(bst);
             printf("Tree mirrored.\n");
             break;
         case 13:
-            printf("Tree is %sbalanced.\n", isBalancedBST(tree) ? "" : "NOT ");
+            printf("Tree is %sbalanced.\n", isBalancedBST(bst) ? "" : "NOT ");
             break;
         case 0:
-            treeFree(tree);
+            treeFree(bst);
             return;
         default: printf("Invalid choice.\n");
         }
-    } while (choice != 0);
-    treeFree(tree);
+    } while (menu_choice != 0);
+    treeFree(bst);
 }
 
 /* --- Recursion menu --- */
 static void menuRecursion(void) {
-    int choice;
-    char buf1[MAX_NAME];
+    int menu_choice;
+    char name_buffer[MAX_NAME];
     do {
         printf("\n=== Recursion Menu ===\n");
         printf(" 1. Count occurrences of a name in file\n");
@@ -486,65 +486,65 @@ static void menuRecursion(void) {
         printf(" 7. Count distinct palindrome subsequences\n");
         printf(" 8. Is a word a palindrome? (recursive)\n");
         printf(" 0. Back\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1: {
-            readLine("Name to count: ", buf1, MAX_NAME);
-            int cnt = countOccurrence(DB_FILE, buf1);
-            printf("'%s' appears %d time(s) in the file.\n", buf1, cnt);
+            readLine("Name to count: ", name_buffer, MAX_NAME);
+            int count = countOccurrence(DB_FILE, name_buffer);
+            printf("'%s' appears %d time(s) in the file.\n", name_buffer, count);
             break;
         }
         case 2: {
-            readLine("Word to remove: ", buf1, MAX_NAME);
-            if (removeOccurrence(DB_FILE, buf1)) {
+            readLine("Word to remove: ", name_buffer, MAX_NAME);
+            if (removeOccurrence(DB_FILE, name_buffer)) {
                 loadAll();
-                printf("Lines containing '%s' removed.\n", buf1);
+                printf("Lines containing '%s' removed.\n", name_buffer);
             }
             break;
         }
         case 3: {
-            readLine("Name: ", buf1, MAX_NAME);
-            Date dob = readDate("New DoB: ");
-            Date dod = readDate("New DoD: ");
-            if (replaceOccurrence(DB_FILE, buf1, dob, dod)) {
+            readLine("Name: ", name_buffer, MAX_NAME);
+            Date new_birth_date = readDate("New DoB: ");
+            Date new_death_date = readDate("New DoD: ");
+            if (replaceOccurrence(DB_FILE, name_buffer, new_birth_date, new_death_date)) {
                 loadAll();
                 printf("Replaced.\n");
             }
             break;
         }
         case 4: {
-            readLine("Name to permute: ", buf1, MAX_NAME);
-            namePermutation(buf1);
+            readLine("Name to permute: ", name_buffer, MAX_NAME);
+            namePermutation(name_buffer);
             break;
         }
         case 5: {
-            readLine("Word: ", buf1, MAX_NAME);
-            subseqName(buf1);
+            readLine("Word: ", name_buffer, MAX_NAME);
+            subseqName(name_buffer);
             break;
         }
         case 6: {
-            Date d1 = readDate("Start date (YYYY-MM-DD): ");
-            Date d2 = readDate("End   date (YYYY-MM-DD): ");
-            longestSubyear(g_events, d1, d2);
+            Date start_date = readDate("Start date (YYYY-MM-DD): ");
+            Date end_date = readDate("End   date (YYYY-MM-DD): ");
+            longestSubyear(g_events, start_date, end_date);
             break;
         }
         case 7: {
-            readLine("Event/word: ", buf1, MAX_NAME);
-            int cnt = distinctSubseqWord(buf1);
-            printf("Distinct palindrome subsequences: %d\n", cnt);
+            readLine("Event/word: ", name_buffer, MAX_NAME);
+            int distinct_count = distinctSubseqWord(name_buffer);
+            printf("Distinct palindrome subsequences: %d\n", distinct_count);
             break;
         }
         case 8: {
-            readLine("Word to check: ", buf1, MAX_NAME);
-            printf("'%s' is %sa palindrome.\n", buf1,
-                   isPalindromeWord(buf1) ? "" : "NOT ");
+            readLine("Word to check: ", name_buffer, MAX_NAME);
+            printf("'%s' is %sa palindrome.\n", name_buffer,
+                   isPalindromeWord(name_buffer) ? "" : "NOT ");
             break;
         }
         case 0: break;
         default: printf("Invalid choice.\n");
         }
-    } while (choice != 0);
+    } while (menu_choice != 0);
 }
 
 int main(void) {
@@ -554,7 +554,7 @@ int main(void) {
 
     loadAll();
 
-    int choice;
+    int menu_choice;
     do {
         printf("\n=== MAIN MENU ===\n");
         printf(" 1. Linked Lists\n");
@@ -564,9 +564,9 @@ int main(void) {
         printf(" 5. Recursion\n");
         printf(" 6. Reload database from file\n");
         printf(" 0. Exit\n");
-        printf("Choice: "); scanf("%d", &choice); getchar();
+        printf("Choice: "); scanf("%d", &menu_choice); getchar();
 
-        switch (choice) {
+        switch (menu_choice) {
         case 1: menuList();      break;
         case 2: menuQueue();     break;
         case 3: menuStack();     break;
@@ -576,7 +576,7 @@ int main(void) {
         case 0: printf("Goodbye!\n"); break;
         default: printf("Invalid choice.\n");
         }
-    } while (choice != 0);
+    } while (menu_choice != 0);
 
     listFree(g_pers);
     listDateFree(g_dates);

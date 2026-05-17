@@ -4,6 +4,27 @@
 #include <string.h>
 #include <ctype.h>
 
+static int compare_age(const void *a, const void *b) {
+    typedef struct { char name[MAX_NAME]; char definition[MAX_DEF]; int age; } PersonItem;
+    const PersonItem *pa = (const PersonItem *)a;
+    const PersonItem *pb = (const PersonItem *)b;
+    return pa->age - pb->age;
+}
+
+static int compare_word_count(const void *a, const void *b) {
+    typedef struct { TList *node; int word_count; } NameItem;
+    const NameItem *na = (const NameItem *)a;
+    const NameItem *nb = (const NameItem *)b;
+    return na->word_count - nb->word_count;
+}
+
+static int compare_age_value(const void *a, const void *b) {
+    typedef struct { TListDate *node; int age_value; } AgeItem;
+    const AgeItem *aa = (const AgeItem *)a;
+    const AgeItem *ab = (const AgeItem *)b;
+    return aa->age_value - ab->age_value;
+}
+
 /* --- TList primitives --- */
 
 TList *listCreate(const char *name, const char *def) {
@@ -114,41 +135,34 @@ TList *sortWord2(TList *syn) {
 TList *sortPersonality(TList *s, TListDate *dates) {
     if (!s || !dates) return NULL;
 
-    int n = 0;
-    TList *p = s; TListDate *d = dates;
-    while (p && d) { n++; p = p->next; d = d->next; }
+    int count = 0;
+    TList *person = s; TListDate *date = dates;
+    while (person && date) { count++; person = person->next; date = date->next; }
 
-    typedef struct { char name[MAX_NAME]; char def[MAX_DEF]; int age; } Item;
-    Item *items = (Item *)malloc(n * sizeof(Item));
-    if (!items) return NULL;
+    typedef struct { char name[MAX_NAME]; char definition[MAX_DEF]; int age; } PersonItem;
+    PersonItem *person_items = (PersonItem *)malloc(count * sizeof(PersonItem));
+    if (!person_items) return NULL;
 
-    p = s; d = dates;
-    for (int i = 0; i < n; i++) {
-        strncpy(items[i].name, p->name,       MAX_NAME - 1);
-        strncpy(items[i].def,  p->definition, MAX_DEF  - 1);
-        items[i].name[MAX_NAME-1] = '\0';
-        items[i].def[MAX_DEF-1]   = '\0';
-        items[i].age = ageFromDates(d->dob, d->dod);
-        p = p->next; d = d->next;
+    person = s; date = dates;
+    for (int i = 0; i < count; i++) {
+        strncpy(person_items[i].name, person->name, MAX_NAME - 1);
+        strncpy(person_items[i].definition, person->definition, MAX_DEF - 1);
+        person_items[i].name[MAX_NAME-1] = '\0';
+        person_items[i].definition[MAX_DEF-1] = '\0';
+        person_items[i].age = ageFromDates(date->dob, date->dod);
+        person = person->next; date = date->next;
     }
 
-    for (int i = 1; i < n; i++) {
-        Item key = items[i];
-        int j = i - 1;
-        while (j >= 0 && items[j].age > key.age) {
-            items[j+1] = items[j]; j--;
-        }
-        items[j+1] = key;
-    }
+    qsort(person_items, count, sizeof(PersonItem), compare_age);
 
-    TList *sorted = NULL, *tail = NULL;
-    for (int i = 0; i < n; i++) {
-        TList *node = listCreate(items[i].name, items[i].def);
-        if (!sorted) { sorted = tail = node; }
+    TList *sorted_list = NULL, *tail = NULL;
+    for (int i = 0; i < count; i++) {
+        TList *node = listCreate(person_items[i].name, person_items[i].definition);
+        if (!sorted_list) { sorted_list = tail = node; }
         else         { tail->next = node; tail = node; }
     }
-    free(items);
-    return sorted;
+    free(person_items);
+    return sorted_list;
 }
 
 bool deletepersonality(const char *filename,
@@ -505,25 +519,23 @@ TQueue *sName(TList *s) {
     int n = listSize(s);
     if (n == 0) return q;
 
-    typedef struct { TList *node; int wc; } Item;
-    Item *items = (Item *)malloc(n * sizeof(Item));
-    if (!items) return q;
+    typedef struct { TList *node; int word_count; } NameItem;
+    NameItem *name_items = (NameItem *)malloc(n * sizeof(NameItem));
+    if (!name_items) return q;
 
-    int i = 0;
-    for (TList *cur = s; cur; cur = cur->next) {
-        items[i].node = cur;
-        items[i].wc   = wordCount(cur->name);
-        i++;
+    int index = 0;
+    for (TList *current = s; current; current = current->next) {
+        name_items[index].node = current;
+        name_items[index].word_count = wordCount(current->name);
+        index++;
     }
-    for (int j = 1; j < n; j++) {
-        Item key = items[j]; int k = j - 1;
-        while (k >= 0 && items[k].wc > key.wc) { items[k+1] = items[k]; k--; }
-        items[k+1] = key;
-    }
+
+    qsort(name_items, n, sizeof(NameItem), compare_word_count);
+
     Date null_date = {0,0,0};
     for (int j = 0; j < n; j++)
-        enqueue(q, items[j].node->name, items[j].node->definition, null_date, null_date);
-    free(items);
+        enqueue(q, name_items[j].node->name, name_items[j].node->definition, null_date, null_date);
+    free(name_items);
     return q;
 }
 
@@ -534,24 +546,22 @@ TQueue *ageP(TListDate *a) {
     TQueue *q = queueCreate();
     if (n == 0) return q;
 
-    typedef struct { TListDate *node; int age; } Item;
-    Item *items = (Item *)malloc(n * sizeof(Item));
-    if (!items) return q;
+    typedef struct { TListDate *node; int age_value; } AgeItem;
+    AgeItem *age_items = (AgeItem *)malloc(n * sizeof(AgeItem));
+    if (!age_items) return q;
 
     int i = 0;
     for (TListDate *cur = a; cur; cur = cur->next) {
-        items[i].node = cur;
-        items[i].age  = ageFromDates(cur->dob, cur->dod);
+        age_items[i].node = cur;
+        age_items[i].age_value = ageFromDates(cur->dob, cur->dod);
         i++;
     }
-    for (int j = 1; j < n; j++) {
-        Item key = items[j]; int k = j - 1;
-        while (k >= 0 && items[k].age > key.age) { items[k+1] = items[k]; k--; }
-        items[k+1] = key;
-    }
+
+    qsort(age_items, n, sizeof(AgeItem), compare_age_value);
+
     for (int j = 0; j < n; j++)
-        enqueue(q, items[j].node->name, "", items[j].node->dob, items[j].node->dod);
-    free(items);
+        enqueue(q, age_items[j].node->name, "", age_items[j].node->dob, age_items[j].node->dod);
+    free(age_items);
     return q;
 }
 

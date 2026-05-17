@@ -4,6 +4,20 @@
 #include <string.h>
 #include <ctype.h>
 
+static int compare_word_count_desc(const void *a, const void *b) {
+    typedef struct { TStack *node; int word_count; } DefinitionItem;
+    const DefinitionItem *da = (const DefinitionItem *)a;
+    const DefinitionItem *db = (const DefinitionItem *)b;
+    return db->word_count - da->word_count;
+}
+
+static int compare_year(const void *a, const void *b) {
+    typedef struct { char name[MAX_NAME]; int year; } YearItem;
+    const YearItem *ya = (const YearItem *)a;
+    const YearItem *yb = (const YearItem *)b;
+    return ya->year - yb->year;
+}
+
 /* --- Stack primitives --- */
 
 TStack *stackCreate(const char *name, const char *def, Date dob, Date dod) {
@@ -164,27 +178,24 @@ TStack *definitionStack(TStack *stk) {
     int n = stackSize(stk);
     if (n == 0) return NULL;
 
-    typedef struct { TStack *node; int wc; } Item;
-    Item *items = (Item *)malloc(n * sizeof(Item));
-    if (!items) return stk;
+    typedef struct { TStack *node; int word_count; } DefinitionItem;
+    DefinitionItem *definition_items = (DefinitionItem *)malloc(n * sizeof(DefinitionItem));
+    if (!definition_items) return stk;
 
     int i = 0;
     for (TStack *cur = stk; cur; cur = cur->next) {
-        items[i].node = cur;
-        items[i].wc   = wordCount(cur->definition);
+        definition_items[i].node = cur;
+        definition_items[i].word_count = wordCount(cur->definition);
         i++;
     }
-    for (int j = 1; j < n; j++) {
-        Item key = items[j]; int k = j - 1;
-        while (k >= 0 && items[k].wc > key.wc) { items[k+1] = items[k]; k--; }
-        items[k+1] = key;
-    }
+
+    qsort(definition_items, n, sizeof(DefinitionItem), compare_word_count_desc);
 
     TStack *result = NULL;
     for (int j = n - 1; j >= 0; j--)
-        push(&result, items[j].node->name, items[j].node->definition,
-             items[j].node->dob, items[j].node->dod);
-    free(items);
+        push(&result, definition_items[j].node->name, definition_items[j].node->definition,
+             definition_items[j].node->dob, definition_items[j].node->dod);
+    free(definition_items);
     return result;
 }
 
@@ -210,31 +221,29 @@ void continuousSearch(TStack *stk) {
     int n = stackSize(stk);
     if (n < 2) { printf("Not enough entries to compare.\n"); return; }
 
-    typedef struct { char name[MAX_NAME]; int year; } Item;
-    Item *items = (Item *)malloc(n * sizeof(Item));
-    if (!items) return;
+    typedef struct { char name[MAX_NAME]; int year; } YearItem;
+    YearItem *year_items = (YearItem *)malloc(n * sizeof(YearItem));
+    if (!year_items) return;
 
     int i = 0;
     for (TStack *cur = stk; cur; cur = cur->next) {
-        strncpy(items[i].name, cur->name, MAX_NAME - 1);
-        items[i].name[MAX_NAME-1] = '\0';
-        items[i].year = cur->dob.year ? cur->dob.year : cur->dod.year;
+        strncpy(year_items[i].name, cur->name, MAX_NAME - 1);
+        year_items[i].name[MAX_NAME-1] = '\0';
+        year_items[i].year = cur->dob.year ? cur->dob.year : cur->dod.year;
         i++;
     }
-    for (int j = 1; j < n; j++) {
-        Item key = items[j]; int k = j - 1;
-        while (k >= 0 && items[k].year > key.year) { items[k+1] = items[k]; k--; }
-        items[k+1] = key;
-    }
+
+    qsort(year_items, n, sizeof(YearItem), compare_year);
+
     printf("Continuous/overlapping events:\n");
     for (int j = 0; j < n - 1; j++) {
-        if (abs(items[j+1].year - items[j].year) <= 1 &&
-            items[j].year != 0 && items[j+1].year != 0)
+        if (abs(year_items[j+1].year - year_items[j].year) <= 1 &&
+            year_items[j].year != 0 && year_items[j+1].year != 0)
             printf("  '%s' (%d)  <->  '%s' (%d)\n",
-                   items[j].name, items[j].year,
-                   items[j+1].name, items[j+1].year);
+                   year_items[j].name, year_items[j].year,
+                   year_items[j+1].name, year_items[j+1].year);
     }
-    free(items);
+    free(year_items);
 }
 
 bool isPersonalityKilled(TStack *stk, const char *name) {
